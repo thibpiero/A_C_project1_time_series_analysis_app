@@ -2,11 +2,11 @@
 #setwd("~/A_C_project1_time_series_analysis_app")
 
 #set wd LV
-#setwd("~/SUISSE_2015-19/STATISTICS_PROGRAMMING/github_repo/A_C_project1_time_series_analysis_app")
+setwd("~/SUISSE_2015-19/STATISTICS_PROGRAMMING/github_repo/A_C_project1_time_series_analysis_app")
 
 #wd thib
-setwd("~/Desktop/GithubRepo/A_C_project1_time_series_analysis_app")
-#Bonjour voici le test de thibeault
+#setwd("~/Desktop/GithubRepo/A_C_project1_time_series_analysis_app")
+
 
 #Load libraries
 library(shiny)
@@ -15,7 +15,6 @@ library(ggplot2)
 library(shinyTime)
 library(tseries)
 library(dsa)
-library(quantmod)
 library(forecast)
 library(ggfortify)
 library(smooth)
@@ -24,7 +23,7 @@ source("ma_function.R")
 source("ra_functions.R")
 
 #load symbols, hashed as comment
-my_symbols = stockSymbols()
+#my_symbols = stockSymbols()
 
 # Define UI
 ui = shinyUI(fluidPage(
@@ -191,6 +190,16 @@ server = shinyServer(function(input, output){
       barplot(monthly_return(my_ts, input$return_method), main = "Return average by month of the year",
               xlab = "Month", col=ifelse(monthly_return(my_ts, input$return_method)>0,"green","red"),
               names.arg = months_names)
+      
+      names <- c(input$stock_name, "" , "S&P 500","", "Gold", "", "Bitcoin $", "")
+      barplot(alternative_assets(my_ts, input$start_time, input$end_time, input$return_method), 
+              main = "Comparison to other assets",
+              names.arg = names,
+              col=c("purple","khaki"),
+              space=c(2,0,2,0,2,0,2,0))
+              legend("top", legend = c("average return", "average variance"), 
+              fill = c("purple", "khaki"))
+              
       par(mfrow=c(1,1))
     }
     
@@ -218,8 +227,8 @@ server = shinyServer(function(input, output){
       my_ts = my_ts[,4]
       myts2 = xts2ts(my_ts, freq = 364.25)
       ets_model = as.character(paste(input$ets_e, input$ets_t, input$ets_s, sep =''))
-      fit = ets(myts2, model = ets_model, damped = input$ets_damped)
-      print(autoplot(forecast(fit)))
+      fit = ets(myts2, model = ets_model, damped = input$ets_damped,)
+      print(autoplot(forecast(fit, h= input$days_forecast, level = as.numeric(input$pred_interval))))
       #autoplot(my_ts, geom = 'line')  
       #autoplot(my_ts)
     }
